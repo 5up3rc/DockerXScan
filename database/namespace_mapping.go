@@ -34,7 +34,7 @@ var DebianReleasesMapping = map[string]string{
 
 // UbuntuReleasesMapping translates Ubuntu code names to version numbers
 var UbuntuReleasesMapping = map[string]string{
-       "precise": "12.04",
+    "precise": "12.04",
 	"quantal": "12.10",
 	"raring":  "13.04",
 	"trusty":  "14.04",
