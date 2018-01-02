@@ -13,3 +13,7 @@ DockerXScan——Docker镜像漏洞扫描器
 #### go get github.com/golang/protobuf
 
 参考链接：https://github.com/coreos/clair
+
+### 待解决bug
+#### Got response 422 with message {"Error":{"Message":"worker: OS and/or package manager are not supported"}}
+
