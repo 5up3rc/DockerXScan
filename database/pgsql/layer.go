@@ -132,9 +132,11 @@ func loadAffectedBy(tx *sql.Tx, featureVersions []database.FeatureVersion) error
 
 	rows, err := tx.Query(searchFeatureVersionVulnerability,
 		buildInputArray(featureVersionIDs))
+
 	if err != nil && err != sql.ErrNoRows {
 		return handleError("searchFeatureVersionVulnerability", err)
 	}
+
 	defer rows.Close()
 
 	vulnerabilities := make(map[int][]database.Vulnerability, len(featureVersions))
@@ -192,6 +194,7 @@ func (pgSQL *pgSQL) FindLayer(name string, withFeatures, withVulnerabilities boo
 	)
 
 	t := time.Now()
+
 	err := pgSQL.QueryRow(searchLayer, name).Scan(
 		&layer.ID,
 		&layer.Name,
@@ -202,6 +205,7 @@ func (pgSQL *pgSQL) FindLayer(name string, withFeatures, withVulnerabilities boo
 		&nsName,
 		&nsVersionFormat,
 	)
+
 	observeQueryTime("FindLayer", "searchLayer", t)
 
 	if err != nil {

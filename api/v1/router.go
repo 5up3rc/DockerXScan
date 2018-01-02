@@ -36,7 +36,7 @@ func httpHandler(h handler, ctx *context) httprouter.Handle {
 		}
 
 		promResponseDurationMilliseconds.
-		WithLabelValues(route, statusStr).
+			WithLabelValues(route, statusStr).
 			Observe(float64(time.Since(start).Nanoseconds()) / float64(time.Millisecond))
 
 		log.WithFields(log.Fields{"remote addr": r.RemoteAddr, "method": r.Method, "request uri": r.RequestURI, "status": statusStr, "elapsed time": time.Since(start)}).Info("Handled HTTP request")

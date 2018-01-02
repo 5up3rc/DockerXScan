@@ -17,15 +17,12 @@ import (
 	"github.com/MXi4oyu/DockerXScan/api/v1"
 	"net/http"
 	"io/ioutil"
-	_"github.com/kr/text"
+	"github.com/kr/text"
 	"time"
 	"sort"
 	"github.com/fatih/color"
 	"strconv"
 	"net"
-    "gopkg.in/mgo.v2"
-    "gopkg.in/mgo.v2/bson"
-    "net/url"
 )
 
 
@@ -73,30 +70,6 @@ func (s *sorter) Less(i, j int) bool {
 }
 
 
-func AppendToFile(filename,content string) error{
-
-    f,err:=os.OpenFile(filename,os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
-    if err!=nil{
-
-    fmt.Println(err.Error())
-   }else{ 
-    n,_:=f.Seek(0,os.SEEK_END) 
-    _,err=f.WriteAt([]byte(content),n)
-   }
-   defer f.Close()
-    return err
-
-}
-
-
-type Results struct{
-
-    Tag_url string
-    Speed  int
-
-}
-
-
 func AnalyzeLocalImage(imageName string, minSeverity database.Severity, endpoint, myAddress, tmpPath string)error   {
 
 	//先将镜像保存到本地临时文件
@@ -118,7 +91,7 @@ func AnalyzeLocalImage(imageName string, minSeverity database.Severity, endpoint
 	}
 
 
-	// Setup a simple HTTP server if Clair is not local.
+	// 开启http服务
 	if !strings.Contains(endpoint, "127.0.0.1") && !strings.Contains(endpoint, "localhost") {
 		allowedHost := strings.TrimPrefix(endpoint, "http://")
 		portIndex := strings.Index(allowedHost, ":")
@@ -201,97 +174,42 @@ func AnalyzeLocalImage(imageName string, minSeverity database.Severity, endpoint
 	}
 
 	By(priority).Sort(vulnerabilities)
-        //fmt.Println(vulnerabilities)
-        var vname,vdescription,vpackage,vfixby,vlink,vlayer string
-        //创建扫描结果文件
-        uimage,_:=url.Parse("https://"+imageName)
-        srpwdfile:="/code/DockerXface/docker_registry_face/static/results/"+uimage.Path+".html"
-
-		//如果存在则删除
-        os.Remove(srpwdfile)
-
-        //更新扫描进度
-        msession,_:=mgo.Dial("localhost:27017")
-        defer msession.Close()
-        msession.SetMode(mgo.Monotonic,true)
-        cs:=msession.DB("scan").C("results")
-        mspeed:=5
-        err=cs.Insert(&Results{"https://"+imageName,mspeed})
-        if err!=nil{
-
-        fmt.Println(err.Error())
-
-        }
 
 	for _, vulnerabilityInfo := range vulnerabilities {
 		vulnerability := vulnerabilityInfo.vulnerability
 		feature := vulnerabilityInfo.feature
 		severity := vulnerabilityInfo.severity
 
-                mspeed++
-
-                err=cs.Update(bson.M{"tag_url":"https://"+imageName},bson.M{"$set":bson.M{"speed":mspeed}})
-                if err!=nil{
-                 fmt.Println(err.Error())
-                }
-
-		//fmt.Printf("%s (%s)\n", vulnerability.Name, coloredSeverity(severity))
-                vname="<div class=\"vname\">"+vulnerability.Name+"&nbsp;&nbsp;"+coloredSeverity(severity)+"</div>" 
-                fmt.Println(vname)
-                AppendToFile(srpwdfile,vname)
+		fmt.Printf("%s (%s)\n", vulnerability.Name, coloredSeverity(severity))
 
 		if vulnerability.Description != "" {
-			//fmt.Printf("%s\n\n", text.Indent(text.Wrap(vulnerability.Description, 80), "\t"))
-                        vdescription="<div class=\"vdescription\">"+vulnerability.Description+"</div>"
-                        fmt.Println(vdescription)
-                        AppendToFile(srpwdfile,vdescription)
+			fmt.Printf("%s\n\n", text.Indent(text.Wrap(vulnerability.Description, 80), "\t"))
 		}
 
-		//fmt.Printf("\tPackage:       %s @ %s\n", feature.Name, feature.Version)
-                vpackage="<div class=\"vpackage\">"+"Package:"+"&nbsp;&nbsp;"+feature.Name+"@"+feature.Version+"</div>"
-                fmt.Println(vpackage)
+		fmt.Printf("\tPackage:       %s @ %s\n", feature.Name, feature.Version)
+
 		if vulnerability.FixedBy != "" {
-			//fmt.Printf("\tFixed version: %s\n", vulnerability.FixedBy)
-                        vfixby="<div class=\"vfixby\">"+"Fixed version:"+"&nbsp;&nbsp;"+vulnerability.FixedBy+"</div>"
-                        fmt.Println(vfixby)
-                        AppendToFile(srpwdfile,vfixby)
+			fmt.Printf("\tFixed version: %s\n", vulnerability.FixedBy)
 		}
 
 		if vulnerability.Link != "" {
-			//fmt.Printf("\tLink:          %s\n", vulnerability.Link)
-                        vlink="<div class=\"vlink\">"+"Link:"+"&nbsp;&nbsp;"+vulnerability.Link+"</div>"
-                        fmt.Println(vlink)
-                        AppendToFile(srpwdfile,vlink)
+			fmt.Printf("\tLink:          %s\n", vulnerability.Link)
 		}
 
-		//fmt.Printf("\tLayer:         %s\n", feature.AddedBy)
-                vlayer="<div class=\"vlayer\">"+"&nbsp;&nbsp;"+feature.AddedBy+"</div>"
-                fmt.Println(vlayer)
+		fmt.Printf("\tLayer:         %s\n", feature.AddedBy)
 		fmt.Println("")
-                AppendToFile(srpwdfile,vlayer)
-                AppendToFile(srpwdfile,"<hr style=\"FILTER: alpha(opacity=100,finishopacity=0,style=2)\" width=\"80%\" color=#987cb9 SIZE=10>")
- 
 	}
 
-        cs.Update(bson.M{"tag_url":"https://"+imageName},bson.M{"$set":bson.M{"speed":100}})
 	if isSafe {
- 
-                cs.Update(bson.M{"tag_url":"https://"+imageName},bson.M{"$set":bson.M{"speed":100}})
-                AppendToFile(srpwdfile,"<h2>No vulnerabilities were detected in your image</h2>")
 		fmt.Printf("%s No vulnerabilities were detected in your image\n", color.GreenString("Success!"))
 	} else if !hasVisibleVulnerabilities {
-                cs.Update(bson.M{"tag_url":"https://"+imageName},bson.M{"$set":bson.M{"speed":100}})
-                AppendToFile(srpwdfile,"<h2>No vulnerabilities matching the minimum severity level were detected in your image</h2>")
 		fmt.Printf("%s No vulnerabilities matching the minimum severity level were detected in your image\n", color.YellowString("NOTE:"))
 	} else {
-                cs.Update(bson.M{"tag_url":"https://"+imageName},bson.M{"$set":bson.M{"speed":100}})
-                fstr:="A total of "+string(len(vulnerabilities))+"vulnerabilities have been detected in your image"
-                AppendToFile(srpwdfile,"<h2>"+fstr+"</h2>")
+
 		return fmt.Errorf("A total of %d vulnerabilities have been detected in your image", len(vulnerabilities))
 
 	}
- 
-        cs.Update(bson.M{"tag_url":"https://"+imageName},bson.M{"$set":bson.M{"speed":100}})
+
 	return nil
 
 }
