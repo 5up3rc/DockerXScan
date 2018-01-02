@@ -10,5 +10,6 @@ DockerXScan——Docker镜像漏洞扫描器
 ## 依赖
 #### go get gopkg.in/mgo.v2
 #### go get gopkg.in/yaml.v2
+#### go get github.com/golang/protobuf
 
 参考链接：https://github.com/coreos/clair
