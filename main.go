@@ -62,7 +62,7 @@ func initMain() int {
 	if err != nil {
 		log.Fatalf("Could not create temporary folder: %s", err)
 	}
-	defer os.RemoveAll(tmpPath)
+	//defer os.RemoveAll(tmpPath)
 
 	// Intercept SIGINT / SIGKILl signals.
 	interrupt := make(chan os.Signal)

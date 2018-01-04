@@ -23,6 +23,7 @@ import (
 	"github.com/fatih/color"
 	"strconv"
 	"net"
+	"github.com/MXi4oyu/Utils/gziputil"
 )
 
 
@@ -120,13 +121,24 @@ func AnalyzeLocalImage(imageName string, minSeverity database.Severity, endpoint
 	for i := 0; i < len(layerIDs); i++ {
 		log.Printf("Analyzing %s\n", layerIDs[i])
 
+		//本地解压layer.tar
+		terr:=gziputil.TarDeCompress(tmpPath+"/"+layerIDs[i]+"/layer.tar",tmpPath+"/"+layerIDs[i]+"/");
+
+		if terr!=nil{
+			fmt.Println(terr)
+		}
+
 		if i > 0 {
+
 			err = analyzeLayer(tmpPath+"/"+layerIDs[i]+"/layer.tar", layerIDs[i], layerIDs[i-1])
 		} else {
+
 			err = analyzeLayer(tmpPath+"/"+layerIDs[i]+"/layer.tar", layerIDs[i], "")
+
 		}
 		if err != nil {
-			return fmt.Errorf("Could not analyze layer: %s", err)
+			fmt.Println("Could not analyze layer: %s", err)
+			continue
 		}
 	}
 
@@ -344,6 +356,8 @@ func analyzeLayer(path, layerName, parentLayerName string) error {
 		body, _ := ioutil.ReadAll(response.Body)
 		return fmt.Errorf("Got response %d with message %s", response.StatusCode, string(body))
 	}
+
+
 
 	//发送layer.tar结束
 
