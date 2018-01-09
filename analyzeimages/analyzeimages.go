@@ -24,6 +24,8 @@ import (
 	"strconv"
 	"net"
 	"github.com/MXi4oyu/Utils/gziputil"
+	"github.com/MXi4oyu/DockerXScan/analyzeimages/plugins/check_webshell"
+	"github.com/MXi4oyu/DockerXScan/analyzeimages/plugins/check_history"
 )
 
 
@@ -122,11 +124,20 @@ func AnalyzeLocalImage(imageName string, minSeverity database.Severity, endpoint
 		log.Printf("Analyzing %s\n", layerIDs[i])
 
 		//本地解压layer.tar
-		terr:=gziputil.TarDeCompress(tmpPath+"/"+layerIDs[i]+"/layer.tar",tmpPath+"/"+layerIDs[i]+"/");
+		check_path:=tmpPath+"/"+layerIDs[i]+"/"
+		terr:=gziputil.TarDeCompress(check_path+"layer.tar",check_path);
 
 		if terr!=nil{
 			fmt.Println(terr)
 		}
+
+		//检测webshell
+		check_webshell.Check(check_path);
+
+		//检测history
+		check_history.Check(tmpPath)
+
+
 
 		if i > 0 {
 
@@ -137,7 +148,7 @@ func AnalyzeLocalImage(imageName string, minSeverity database.Severity, endpoint
 
 		}
 		if err != nil {
-			fmt.Println("Could not analyze layer: %s", err)
+			//fmt.Println("Could not analyze layer: %s", err)
 			continue
 		}
 	}
