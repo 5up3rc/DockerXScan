@@ -30,6 +30,9 @@ func Check(path string)(error) {
 
 	config:= manifest[0].Config
 
+	fmt.Println("########################################")
+	fmt.Println("########################################")
+
 	fmt.Println("history_config_file:",config)
 
 	//解析配置文件
@@ -43,8 +46,33 @@ func Check(path string)(error) {
 
 	type configItem struct {
 		Architecture string
-		Config []string
+		Config map[string]interface{}
+		Container string
+		Container_config map[string]interface{}
+		Created string
+		Docker_version string
+		History []map[string]interface{}
+		Osv string
+		Rootfs map[string]interface{}
 
+	}
+
+	var cfg configItem
+
+	if err = json.NewDecoder(mhf).Decode(&cfg); err != nil {
+		return  err
+	}
+
+	mhistory:=cfg.History
+	fmt.Println("########################################")
+	fmt.Println("########################################")
+	fmt.Println("Historys：")
+
+	for i,_:= range mhistory{
+		created:=mhistory[i]["created"]
+		fmt.Println(created)
+		createdby:=mhistory[i]["created_by"]
+		fmt.Println(createdby)
 	}
 
 

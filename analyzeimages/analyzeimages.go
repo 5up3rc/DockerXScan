@@ -117,6 +117,10 @@ func AnalyzeLocalImage(imageName string, minSeverity database.Severity, endpoint
 	}
 
 
+	//检测history
+	check_history.Check(tmpPath)
+
+
 
 	//分析每一层镜像
 	log.Printf("Analyzing %d layers... \n", len(layerIDs))
@@ -134,8 +138,7 @@ func AnalyzeLocalImage(imageName string, minSeverity database.Severity, endpoint
 		//检测webshell
 		check_webshell.Check(check_path);
 
-		//检测history
-		check_history.Check(tmpPath)
+
 
 
 
