@@ -26,6 +26,7 @@ import (
 	"github.com/MXi4oyu/Utils/gziputil"
 	"github.com/MXi4oyu/DockerXScan/analyzeimages/plugins/check_webshell"
 	"github.com/MXi4oyu/DockerXScan/analyzeimages/plugins/check_history"
+	"github.com/MXi4oyu/DockerXScan/analyzeimages/plugins/check_syscall"
 )
 
 
@@ -154,6 +155,8 @@ func AnalyzeLocalImage(imageName string, minSeverity database.Severity, endpoint
 			//fmt.Println("Could not analyze layer: %s", err)
 			continue
 		}
+
+
 	}
 
 	//获取漏洞信息
@@ -163,6 +166,9 @@ func AnalyzeLocalImage(imageName string, minSeverity database.Severity, endpoint
 	if err != nil {
 		fmt.Errorf("Could not get layer information: %s", err)
 	}
+
+	//检测系统调用
+	check_syscall.Check()
 
 	//打印报告
 
