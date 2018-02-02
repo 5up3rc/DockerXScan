@@ -98,7 +98,7 @@ func Check()  {
 
 	for _,poc :=range pocs{
 		fmt.Println("###########################################")
-		fmt.Println("Processe")
+		fmt.Println("Process")
 		fmt.Println("###########################################")
 
 		ppid,_:=poc.Ppid()
