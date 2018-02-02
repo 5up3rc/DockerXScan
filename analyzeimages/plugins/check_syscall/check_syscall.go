@@ -5,7 +5,6 @@ import (
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
-	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 	"github.com/shirou/gopsutil/process"
@@ -22,43 +21,85 @@ func Check()  {
 	fmt.Println("###########################################")
 	docker.ListNetworks()
 
+	fmt.Println("###########################################")
+	fmt.Println("hostinfo")
+	fmt.Println("###########################################")
+
 	//host
 	hinfo,_:=host.Info()
-	fmt.Println(hinfo.BootTime,hinfo.HostID,hinfo.Hostname,hinfo.KernelVersion,hinfo.OS,hinfo.Platform,hinfo.PlatformFamily,hinfo.PlatformVersion,hinfo.Procs,hinfo.Uptime,hinfo.VirtualizationRole,hinfo.VirtualizationSystem)
+	fmt.Println(hinfo)
 
+	fmt.Println("###########################################")
+	fmt.Println("CUPinfo")
+	fmt.Println("###########################################")
 	//cpu
-	cinfo,_:=cpu.Info()
-	fmt.Println(cinfo)
+	cinfos,_:=cpu.Info()
+	for _,cinfo :=range cinfos{
+
+		fmt.Println(cinfo)
+	}
+
+	fmt.Println("###########################################")
+	fmt.Println("Diskinfo")
+	fmt.Println("###########################################")
 
 	//disk
 	dio,_:=disk.IOCounters()
+	fmt.Println("###########################################")
+	fmt.Println("disk.IOCounters")
+	fmt.Println("###########################################")
 	fmt.Println(dio)
-	dpartition,_:=disk.Partitions(true)
-	fmt.Println(dpartition)
+
+	fmt.Println("###########################################")
+	fmt.Println("disk.Partitions")
+	fmt.Println("###########################################")
+	dpartitions,_:=disk.Partitions(true)
+	for _,dpartition := range dpartitions{
+		fmt.Println(dpartition)
+	}
+
+	fmt.Println("###########################################")
+	fmt.Println("disk.Usage")
+	fmt.Println("###########################################")
+
 	dusage,_:=disk.Usage("/")
 	fmt.Println(dusage)
 
-	//load
-	lavg,_:=load.Avg()
-	fmt.Println(lavg)
-	lmisc,_:=load.Misc()
-	fmt.Println(lmisc)
-
+	fmt.Println("###########################################")
+	fmt.Println("Meminfo")
+	fmt.Println("###########################################")
 	//mem
 	mvirtual,_:=mem.VirtualMemory()
 	fmt.Println(mvirtual)
 
+	fmt.Println("###########################################")
+	fmt.Println("net info")
+	fmt.Println("###########################################")
 	//net
+	fmt.Println("###########################################")
+	fmt.Println("net.IOCounters")
+	fmt.Println("###########################################")
 	nio,_:=net.IOCounters(true)
 	fmt.Println(nio)
-	ninter,_:=net.Interfaces()
-	fmt.Println(ninter)
+	fmt.Println("###########################################")
+	fmt.Println("net.Interfaces")
+	fmt.Println("###########################################")
+	ninters,_:=net.Interfaces()
+	for _,ninter :=range ninters{
+		fmt.Println(ninter)
+	}
 
+	fmt.Println("###########################################")
+	fmt.Println("processinfo")
+	fmt.Println("###########################################")
 	//process
 
 	pocs,_:=process.Processes()
 
 	for _,poc :=range pocs{
+		fmt.Println("###########################################")
+		fmt.Println("Processe")
+		fmt.Println("###########################################")
 
 		ppid,_:=poc.Ppid()
 		pname,_:=poc.Name()
@@ -75,7 +116,20 @@ func Check()  {
 		pthreads,_:=poc.NumThreads()
 		pusername,_:=poc.Username()
 
-		fmt.Println(ppid,pname,meminfo,cmdline,pconns,cpuaffi,cwd,exe,pctime,gids,pioc,pnice,pthreads,pusername)
+		fmt.Println("Ppid:",ppid)
+		fmt.Println("Name:",pname)
+		fmt.Println("MemoryInfo:",meminfo)
+		fmt.Println("Cmdline:",cmdline)
+		fmt.Println("Connections:",pconns)
+		fmt.Println("CPUAffinity:",cpuaffi)
+		fmt.Println("Cwd:",cwd)
+		fmt.Println("Exe:",exe)
+		fmt.Println("CreateTime",pctime)
+		fmt.Println("Gids:",gids)
+		fmt.Println("IOCounters:",pioc)
+		fmt.Println("IOnice:",pnice)
+		fmt.Println("NumThreads:",pthreads)
+		fmt.Println("Username:",pusername)
 
 	}
 
